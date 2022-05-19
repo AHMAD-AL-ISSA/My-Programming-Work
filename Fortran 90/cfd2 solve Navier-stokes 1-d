@@ -1,0 +1,105 @@
+!****************************************
+!* Program cfd2 solve Navier-stokes 1-d *
+!*                                      *
+!* du/dt=mu*d2u/dy2, implicit method    *
+!*                                      *
+!*             AHMAD AL-ISSA            *
+!****************************************
+
+implicit none
+integer, parameter:: m=41, itp=20
+real, dimension (1:m) ::u,a,b,c,d,rao,gamma
+real::r,time
+integer::i,it
+real, parameter::nu=0.000217, uo=40.0, tmax=2.0, h=0.040
+real, parameter::dt=0.01, dy=0.001
+r = nu*dt/dy/dy
+
+! calculate coefficients
+
+do i=2,m-1
+a(i)=r
+b(i)=-1-2*r
+c(i)=r
+end do
+
+! initial conditions from 1 to 41
+
+do i=1,m ;u(i)=0
+end do
+
+! boundary conditions
+
+u(1)=uo
+! time iteration starts
+write(*,*)'results of program cfd2 parabolic explicit 1d'
+write(*,*)'---------------------------------------------'
+write(*,*)''
+time=0.;it=0
+
+do while (time < tmax)
+time = time + dt; it = it + 1
+
+! calculate d(i)
+
+d(2)=-u(2)-a(2)*u(1)
+do i=3,m-2 !from 3 to 39
+d(i)=-u(i)
+end do
+
+d(m-1)=-u(m-1)-c(m-1)*u(m)
+! calculate gamma
+
+gamma(2)=c(2)/b(2)
+rao(2)=d(2)/b(2)
+do i=3,m-1 !from 3 to 40
+gamma(i)=c(i)/(b(i)-a(i)*gamma(i-1))
+rao(i)=(d(i)-a(i)*rao(i-1))/(b(i)-a(i)*gamma(i-1))
+end do
+
+! calculate u(i)
+
+u(m-1)=rao(m-1) ! u(40)
+do i=m-2,2, -(1) ! from 39 to 2
+u(i)=rao(i)-gamma(i)*u(i+1)
+end do
+if (mod(it,itp).eq.0.)then
+write(*,1)it,time
+write(*,2)(u(i),i=1,m,5)
+write(*,*)'' ! to make space between rows
+
+end if
+end do
+1 format(' it=',i4,' time=',f5.3,'sec')
+2 format(' velocity=',9(3x,f4.1))
+stop
+end
+
+
+
+
+
+
+! Results
+! results of program cfd2 parabolic explicit 1d
+! ---------------------------------------------
+! it= 20 time= .200sec
+! velocity= 40.0 23.4 11.1 4.3 1.3 .4 .1 .0 .0
+! it= 40 time= .400sec
+! velocity= 40.0 28.1 17.8 10.1 5.1 2.3 .9 .3 .0
+! it= 60 time= .600sec
+! velocity= 40.0 30.2 21.3 14.0 8.5 4.8 2.4 1.0 .0
+! it= 80 time= .800sec
+! velocity= 40.0 31.5 23.6 16.7 11.2 7.0 4.0 1.8 .0
+! it= 100 time=1.000sec
+! velocity= 40.0 32.4 25.2 18.7 13.3 8.8 5.3 2.5 .0
+! it= 120 time=1.200sec
+! velocity= 40.0 33.0 26.3 20.2 14.8 10.2 6.4 3.0 .0
+! it= 140 time=1.400sec
+! velocity= 40.0 33.5 27.2 21.3 16.0 11.3 7.2 3.5 .0
+! it= 160 time=1.600sec
+! velocity= 40.0 33.8 27.9 22.2 17.0 12.2 7.9 3.8 .0
+! it= 180 time=1.800sec
+! velocity= 40.0 34.1 28.4 22.8 17.7 12.9 8.4 4.1 .0
+! it= 200 time=2.000sec
+! velocity= 40.0 34.3 28.7 23.4 18.2 13.4 8.7 4.3 .0
