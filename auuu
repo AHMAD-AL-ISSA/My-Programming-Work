@@ -1,0 +1,231 @@
+clear
+clc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MATLAB 2021 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% Richardson Equation Calculations %%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% AHMAD AL-ISSA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 13.02.2022 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%-------------------------------- information -----------------------------
+
+Dw=1*10^-3;                 % wire diameter, m 
+Rw=Dw/2;                    % wire radius, m
+Lw=0.86;                    % wire length, m
+Cw=pi*Dw;                   % wire circumference, m
+Aw=Cw*Lw;                   % wire surface area, m2
+
+Dt=0.078;                   % tube diameter, m
+Rt=Dt/2;                    % tube radius, m
+Lt=0.86;                    % tube lenght, m
+Ct=pi*Dt;                   % tube circumference, m
+At=Ct*Lt;                   % tube surface area, m2
+
+e0=8.85*10^-12;             % free space permittivity, c2/Nm2
+kk=1.38*10^-23;             % Boltzmann constant, J/k
+Ath=1.2*10^6;               % Universal constant's A/m2k2
+e=1.602*10^-19;             % electron charge, c
+
+T(1)=829.15;                % at 600   average temperature, K
+T(2)=916.15;                % at 700   average temperature, K
+T(3)=962.4;                 % at 750   average temperature, K
+T(4)=1002.65;               % at 800   average temperature, K
+T(5)=1070.4;                % at 870   average temperature, K
+
+%------------------------------- Loading Data -----------------------------
+
+load DataNegWithoutSteel14820.mat
+I=DataNegWithoutSteel14820.Variables;
+
+%%%%%%%%%%%%%%% electrical field V/m & Schottky effect in J %%%%%%%%%%%%%%%
+
+m=0;   
+
+for i=1:11
+
+    KV(i)=m;
+    sqrtKV(i)=sqrt(m);
+  
+    if i<=10
+    
+        KVV(i)=m;
+        sqrtKVV(i)=sqrt(m);
+
+    end
+    
+   E(i)=1000*KV(i)/(Rw*log(Rt/Rw));                                        % electrical field V/m        
+   dw(i)=sqrt((E(i)*e^3)/(4*pi*e0));                                       % schottky effect in J    
+
+   m=m+0.5;
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%% Field Enhancement Factor %%%%%%%%%%%%%%%%%%%%%%%%%
+
+for i=1:5                  % 5 values of Temps    
+
+    n=0;
+
+    for j=3:9              % 3-9 values of volts 
+        for k=4:10         % 4-10 values of volts      
+            if (j<k)
+
+                n=n+1;
+                FEF(n,i)=((kk*T(i)/(dw(k)-dw(j)))*log(I(k,i)/I(j,i)))^2;   % Field Enhancement Factor
+   
+            end
+        end
+    end
+
+end
+FEFaver=sum(FEF(:,:),"all")/140;                                           % Average Field Enhancement Factor 2 for All - Value
+
+%%%%%%%%%%%%%%%%%%%%%%%%% Schottky Effect in e.V. %%%%%%%%%%%%%%%%%%%%%%%%%
+
+for i=1:11                 % 11 values of volts 
+      
+    dws(i)=sqrt(FEFaver)*dw(i)/e;                                          % schottky effect in e.V.  
+   
+end
+
+%%%%%%%%%%%%%%%%%%%%%%% Experimental A in (A/m^2K^2) %%%%%%%%%%%%%%%%%%%%%%
+
+for i=1:11                 % 11 values of volts    
+    n=0;
+    for j=1:4              % 4 values of Temps
+        for k=2:5
+            if (j<k)
+
+                n=n+1;
+            
+                AA=T(k)/T(j);
+                BB=(T(j)^2)/(I(i,j)/Aw);
+                CC=(T(k)^2)/(I(i,k)/Aw);
+    
+                Aexp(i,n)=(BB/(CC^AA))^(1/(AA-1));
+    
+            end
+        end
+    end
+end
+
+    Aexpaver=sum(Aexp(3:9,1:4),"all")/28;                                  % Average Effective Work Function for every Tempreature - Curve
+
+%%%%%%%%%%%%%%%%%%%%% Effective Work Function in e.V. %%%%%%%%%%%%%%%%%%%%%
+
+for i=1:11                 % 11 values of volts    
+    for j=1:5              % 5 values of Temps
+
+        AWS1=(Aexpaver*T(j)^2)/(I(i,j)/Aw);
+        EWF1(i,j)=(kk*T(j)*log(AWS1))/e;
+
+        AWS2=(Ath*T(j)^2)/(I(i,j)/Aw);
+        EWF2(i,j)=(kk*T(j)*log(AWS2))/e;
+  
+    end
+
+    EWF1aver(i)=sum(EWF1(i,:),"all")/5;                                    % Average Effective Work Function for all Tempreature - Experimental
+    
+    EWF2aver(i)=sum(EWF2(i,:),"all")/5;                                    % Average Effective Work Function for all Tempreature - Theoretical
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%% Work Function in e.V. %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+for i=1:11                 % 11 values of volts    
+    for j=1:5              % 5 values of Temps
+    
+        WF(i,j)=EWF1(i,j)+dws(i);                                          % Work Function in e.V.  
+   
+    end
+    
+    WFaver(i)=sum(WF(i,:),"all")/5;                                        % Average Effective Work Function for all Tempreature - Curve
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+subplot(2,2,1)
+plot (sqrtKV,EWF1(:,5), 'MarkerSize',10,'LineWidth',2,'Color','r')
+hold on
+plot (sqrtKV,EWF1(:,4), 'MarkerSize',10,'LineWidth',2,'Color','m')
+hold on
+plot (sqrtKV,EWF1(:,3), 'MarkerSize',10,'LineWidth',2,'Color','g')
+hold on
+plot (sqrtKV,EWF1(:,2), 'MarkerSize',10,'LineWidth',2,'Color','b')
+hold on
+plot (sqrtKV,EWF1(:,1), 'MarkerSize',10,'LineWidth',2,'Color','c')
+%hold on
+%plot (sqrtKV,EWF1aver, ':o','MarkerSize',10,'LineWidth',2,'Color','k')
+
+grid on
+legend ('1070 K','1002 K','962 K','916 K','829 K','The Average')
+title('Wire, Diam. 1mm, Stainless Steel (1.4820)','FontSize',12,'Color','r')
+xlabel ('Square Root of ( Voltage / kV )','FontSize',12,'Color','k')
+ylabel ('Effective Work Function / eV','FontSize',12,'Color','k')
+
+txt = ['The Calculations at Average A_{exp} = ' num2str(Aexpaver,'%.1s') ' A/m^2K^2'];
+text(0.5,3.3,txt,'FontSize',10,'Color','k')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+subplot(2,2,2)
+plot (sqrtKVV(3:10),FEF(3:10,5),'MarkerSize',10,'LineWidth',2,'Color','r')
+hold on
+plot (sqrtKVV(3:10),FEF(3:10,4),'MarkerSize',10,'LineWidth',2,'Color','m')
+hold on
+plot (sqrtKVV(3:10),FEF(3:10,3),'MarkerSize',10,'LineWidth',2,'Color','g')
+hold on
+plot (sqrtKVV(3:10),FEF(3:10,2),'MarkerSize',10,'LineWidth',2,'Color','b')
+hold on
+plot (sqrtKVV(3:10),FEF(3:10,1),'MarkerSize',10,'LineWidth',2,'Color','c')
+%hold on
+%plot (sqrtKVV(3:10),FEFaver1(1,3:10), ':o','MarkerSize',10,'LineWidth',2,'Color','k')
+
+grid on
+legend ('1070 K','1002 K','962 K','916 K','829 K','The Average')
+title('Wire, Diam. 1mm, Stainless Steel (1.4820)','FontSize',12,'Color','r')
+xlabel ('Square Root of ( Voltage / kV )','FontSize',12,'Color','k')
+ylabel ('Field Enhancement Factor','FontSize',12,'Color','k')
+
+txt = ['Average F_{fe} = ' num2str(FEFaver,'%.2f') ];
+text(1.2,120,txt)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+subplot(2,2,3)
+plot (sqrtKV,WF(:,5),'MarkerSize',10,'LineWidth',2,'Color','r')
+hold on
+plot (sqrtKV,WF(:,4),'MarkerSize',10,'LineWidth',2,'Color','m')
+hold on
+plot (sqrtKV,WF(:,3),'MarkerSize',10,'LineWidth',2,'Color','g')
+hold on
+plot (sqrtKV,WF(:,2),'MarkerSize',10,'LineWidth',2,'Color','b')
+hold on
+plot (sqrtKV,WF(:,1),'MarkerSize',10,'LineWidth',2,'Color','c')
+hold on
+plot (sqrtKV,WFaver, ':o','MarkerSize',10,'LineWidth',2,'Color','k')
+
+grid on
+legend ('1070 K','1002 K','962 K','916 K','829 K','The Average')
+xlabel ('Square Root of ( Voltage / kV )','FontSize',12,'Color','k')
+ylabel ('Work Function / e.V.','FontSize',12,'Color','k')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+subplot(2,2,4)
+plot (sqrtKV(3:10),dws(3:10),':o','MarkerSize',10,'LineWidth',2,'Color','k')
+
+grid on
+xlabel ('Square Root of ( Voltage / kV )','FontSize',12,'Color','k')
+ylabel ('Schottky Effect / e.V.','FontSize',12,'Color','k')
+
+txt = ['The Calculations at Average F_{fe} = ' num2str(FEFaver,'%.2f') ];
+text(1.2,0.22,txt)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%xlswrite ('ResultsNegWithoutSteel14820EWF.xlsx',[sqrtKV(:),EWF(:,:)],'sheet1','A2');
+%xlswrite ('ResultsNegWithoutSteel14820averEWF.xlsx',[sqrtKV(:),averEWF(:)],'sheet1','A2');
+
+%xlswrite ('ResultsNegWithoutSteel14820FEF.xlsx',[sqrtKVV(:),FEF(:,:)],'sheet1','A2');
+%xlswrite ('ResultsNegWithoutSteel14820averFEF.xlsx',[sqrtKVV(:),averFEF(:)],'sheet1','A2');
