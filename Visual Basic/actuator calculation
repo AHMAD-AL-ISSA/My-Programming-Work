@@ -1,0 +1,797 @@
+Imports System.Windows.Forms
+Public Class dact1
+    Dim tc As Actuator1
+    Dim last As String
+    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+
+
+        Try
+line200:
+
+            Dim coad As Decimal
+
+
+            If RadioButton1.Checked = True Then
+
+                Dim g As Decimal = 9.81
+
+                Dim fext As Decimal
+                Dim fret As Decimal
+
+
+                Dim Ap As Decimal
+                Dim Aa As Decimal
+
+                Dim volume As Decimal
+
+                Dim mext As Decimal = tbmext.Text
+                Dim mret As Decimal = tbmret.Text
+
+                Dim mtext As Decimal
+                Dim mtret As Decimal
+
+                Dim fmtext As Decimal
+                Dim fmtret As Decimal
+
+                Dim ffmext As Decimal
+                Dim ffmret As Decimal
+
+                Dim dp As Decimal = tbdp.Text
+                Dim dr As Decimal = tbdr.Text
+                Dim l As Decimal = tblc.Text
+                Dim den As Decimal = tbdenr.Text
+                Dim a As Decimal = tbangle.Text * (Math.PI / 180)
+
+                ''''''''''''''''''''''''''''''''''''''''''convert'''''''''''''''''''''''''''''''''''
+                dp = convert_to_meter(dp, cbdp.Text)
+                dr = convert_to_meter(dr, cbdr.Text)
+                l = convert_to_meter(l, cblc.Text)
+                den = convert_to_kgpm3(den, cbdenr.Text)
+
+
+                If dp > dr Then
+
+                    volume = ((Math.PI) / 4) * (dp) ^ 2 * l
+
+
+                    If RadioButton100.Checked = True Then
+
+                        Ap = ((Math.PI) / 4) * (dp) ^ 2
+                        Aa = ((Math.PI) / 4) * (((dp) ^ 2) - ((dr) ^ 2))
+
+                        mtext = (mext + volume * den)
+
+                        mtret = (mret + volume * den)
+
+
+                        fext = mtext * g * Math.Sin(a)
+
+                        fret = -mtret * g * Math.Sin(a)
+                        '''''''''''''''''''''''''هذه قوة الاحتكاك ممكن تحسبها و تظيفها و لكن تظيف كفاءة  او  بالعكس ''''''''''''''
+                        'ffmext = 0.14 * mext * g * Math.Cos(a)
+
+                        'ffmret = 0.14 * mret * g * Math.Cos(a)
+
+
+
+                    ElseIf RadioButton200.Checked = True Then
+
+                        Ap = ((Math.PI) / 4) * (((dp) ^ 2) - ((dr) ^ 2))
+                        Aa = ((Math.PI) / 4) * (((dp) ^ 2) - ((dr) ^ 2))
+
+
+                        mtext = mext + 2 * volume * den
+
+                        mtret = mret + 2 * volume * den
+
+
+                        fext = mtext * g * Math.Sin(a)
+
+                        fret = -mtret * g * Math.Sin(a)
+
+                        '''''''''''''''''''''''''هذه قوة الاحتكاك ممكن تحسبها و تظيفها و لكن تظيف كفاءة  او  بالعكس ''''''''''''''
+                        'ffmext = 0.14 * mext * g * Math.Cos(a)
+
+                        'ffmret = 0.14 * mret * g * Math.Cos(a)
+
+                    End If
+
+                    'Else
+
+                    '    MsgBox("input d1 > d2")
+                    '    GoTo line200
+                End If
+
+                ''''''''''''''''''''''''''''''''''''''from pump to '''''''''''''''''''''''''''''''''''
+
+                If RadioButton5.Checked = True Then
+
+                    coad = 918
+                End If
+
+
+                If RadioButton6.Checked = True Then
+
+                    coad = 919
+                End If
+
+                If RadioButton3.Checked = True Then
+
+                    coad = 920
+                End If
+
+                '''''''''''''''''''''''''''''''''''''from cylinder''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton25.Checked = True Then
+
+                    coad = 1018
+                End If
+
+                If RadioButton24.Checked = True Then
+
+                    coad = 1019
+                End If
+
+                If RadioButton21.Checked = True Then
+
+                    coad = 1020
+                End If
+
+                '''''''''''''''''''''''''''''''''''''''''from cylinder'''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton23.Checked = True Then
+
+                    coad = 1118
+                End If
+
+                If RadioButton22.Checked = True Then
+
+                    coad = 1119
+                End If
+
+                If RadioButton28.Checked = True Then
+
+                    coad = 1120
+                End If
+
+                '''''''''''''''''''''''''''''''from pump to''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton7.Checked = True Then
+                    coad = 1512
+                End If
+
+                If RadioButton8.Checked = True Then
+                    coad = 1513
+                End If
+
+                If RadioButton4.Checked = True Then
+                    coad = 1514
+                End If
+
+                ''''''''''''''''''''''''''''''''from cylinder''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton32.Checked = True Then
+                    coad = 1612
+                End If
+
+                If RadioButton31.Checked = True Then
+                    coad = 1613
+                End If
+
+                If RadioButton27.Checked = True Then
+                    coad = 1614
+                End If
+
+                '''''''''''''''''''''''''''''''''from cylinder'''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton30.Checked = True Then
+                    coad = 1712
+                End If
+
+                If RadioButton29.Checked = True Then
+                    coad = 1713
+                End If
+
+                If RadioButton26.Checked = True Then
+                    coad = 1714
+                End If
+
+
+                tc.Leangth = l
+
+                tc.Areap = Ap
+                tc.Areaa = Aa
+
+                tc.forceext = fext
+                tc.forceret = fret
+
+
+            ElseIf RadioButton2.Checked = True Then
+
+                Dim T As Decimal = tbT.Text
+                Dim D As Decimal = tbD.Text
+                Dim f As Decimal
+
+                Dim Pm As Decimal
+
+                ''''''''''''''''''''''''''''''''''''''''''convert'''''''''''''''''''''''''''''''''''
+                T = convert_to_Nm(T, cbT.Text)
+                D = convert_to_m3prev(D, cbD.Text)
+
+
+
+                Pm = (T * 2 * Math.PI) / (0.9 * D)
+                f = T / 0.1
+
+                ''''''''''''''''''''''hyd. motor..........................
+
+                ''''''''''''''''''''''''''''''''''''''from pump to '''''''''''''''''''''''''''''''''''
+
+                If RadioButton5.Checked = True Then
+                    coad = 9180
+                End If
+
+                If RadioButton6.Checked = True Then
+                    coad = 9190
+                End If
+
+                If RadioButton3.Checked = True Then
+                    coad = 9200
+                End If
+
+                '''''''''''''''''''''''''''''''''''''from cylinder''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton25.Checked = True Then
+                    coad = 10180
+                End If
+
+                If RadioButton24.Checked = True Then
+                    coad = 10190
+                End If
+
+                If RadioButton21.Checked = True Then
+                    coad = 10200
+                End If
+
+                '''''''''''''''''''''''''''''''''''''''''from cylinder'''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton23.Checked = True Then
+                    coad = 11180
+                End If
+
+                If RadioButton22.Checked = True Then
+                    coad = 11190
+                End If
+
+                If RadioButton28.Checked = True Then
+                    coad = 11200
+                End If
+
+                '''''''''''''''''''''''''''''''from pump to''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton7.Checked = True Then
+                    coad = 15120
+                End If
+
+                If RadioButton8.Checked = True Then
+                    coad = 15130
+                End If
+
+                If RadioButton4.Checked = True Then
+                    coad = 15140
+                End If
+
+                ''''''''''''''''''''''''''''''''from cylinder''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton32.Checked = True Then
+                    coad = 16120
+                End If
+
+                If RadioButton31.Checked = True Then
+                    coad = 16130
+                End If
+
+                If RadioButton27.Checked = True Then
+                    coad = 16140
+                End If
+
+                '''''''''''''''''''''''''''''''''from cylinder'''''''''''''''''''''''''''''''''''''''''
+
+                If RadioButton30.Checked = True Then
+                    coad = 17120
+                End If
+
+                If RadioButton29.Checked = True Then
+                    coad = 17130
+                End If
+
+                If RadioButton26.Checked = True Then
+                    coad = 17140
+                End If
+
+
+                tc.pressurem = Pm
+                tc.Displacement = D
+                tc.force = f
+
+            End If
+
+            tc.coad = coad
+
+            cyli.Add(tc)
+
+        Catch ex As Exception
+            MsgBox("Please Check The Input Data, and Don't Input Letters or Symbols")
+
+        End Try
+
+        Me.DialogResult = System.Windows.Forms.DialogResult.OK
+        Me.Close()
+    End Sub
+
+    Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
+        Me.DialogResult = System.Windows.Forms.DialogResult.Cancel
+        Me.Close()
+    End Sub
+
+    Private Sub dc_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
+
+        tbdp.Focus()
+
+    End Sub
+
+    Private Sub dc_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+
+        'tbdp.Text = ""
+        'tbdr.Text = ""
+        'tblc.Text = ""
+        'tbdenr.Text = ""
+        'tbmext.Text = ""
+        'tbmret.Text = ""
+        'tbangle .Text =""
+
+        cbdp.SelectedIndex = 0
+        cbdr.SelectedIndex = 0
+        cblc.SelectedIndex = 0
+        cbdenr.SelectedIndex = 0
+        cbmext.SelectedIndex = 0
+        cbmret.SelectedIndex = 0
+        cbT.SelectedIndex = 0
+        cbD.SelectedIndex = 0
+
+        RadioButton1.Checked = True
+
+        RadioButton100.Checked = True
+
+        RadioButton300.Checked = True
+
+    End Sub
+
+    Private Sub cbdp_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cbdp.DropDown
+        last = cbdp.Text
+    End Sub
+    Private Sub cbdp_SelectedIndexChanged_1(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbdp.SelectedIndexChanged
+        Try
+            Select Case (last & cbdp.Text)
+                Case "m(meter)cm(centimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 100).ToString
+                Case "cm(centimeter)m(meter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 100).ToString
+                Case "m(meter)mm(millimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 1000).ToString
+                Case "mm(millimeter)m(meter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 1000).ToString
+                Case "m(meter)ft(feet)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 3.28083989501312).ToString
+                Case "ft(feet)m(meter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 3.28083989501312).ToString
+                Case "m(meter)in(inch)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 39.3700787401575).ToString
+                Case "in(inch)m(meter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 39.3700787401575).ToString
+                Case "cm(centimeter)mm(millimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 10).ToString
+                Case "mm(millimeter)cm(centimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 10).ToString
+                Case "ft(feet)cm(centimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 30.48).ToString
+                Case "cm(centimeter)ft(feet)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 30.48).ToString
+                Case "in(inch)cm(centimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 2.54).ToString
+                Case "cm(centimeter)in(inch)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 2.54).ToString
+                Case "in(inch)mm(millimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 25.4).ToString
+                Case "mm(millimeter)in(inch)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 25.4).ToString
+                Case "ft(feet)in(inch)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 12).ToString
+                Case "in(inch)ft(feet)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 12).ToString
+                Case "ft(feet)mm(millimeter)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) * 304.8).ToString
+                Case "mm(millimeter)ft(feet)"
+                    tbdp.Text = (CType(tbdp.Text, Decimal) / 304.8).ToString
+            End Select
+        Catch ex As Exception
+        End Try
+    End Sub
+    Private Sub cbdr_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cbdr.DropDown
+        last = cbdr.Text
+    End Sub
+    Private Sub cbdr_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbdr.SelectedIndexChanged
+        Try
+            Select Case (last & cbdr.Text)
+                Case "m(meter)cm(centimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 100).ToString
+                Case "cm(centimeter)m(meter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 100).ToString
+                Case "m(meter)mm(millimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 1000).ToString
+                Case "mm(millimeter)m(meter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 1000).ToString
+                Case "m(meter)ft(feet)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 3.28083989501312).ToString
+                Case "ft(feet)m(meter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 3.28083989501312).ToString
+                Case "m(meter)in(inch)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 39.3700787401575).ToString
+                Case "in(inch)m(meter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 39.3700787401575).ToString
+                Case "cm(centimeter)mm(millimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 10).ToString
+                Case "mm(millimeter)cm(centimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 10).ToString
+                Case "ft(feet)cm(centimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 30.48).ToString
+                Case "cm(centimeter)ft(feet)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 30.48).ToString
+                Case "in(inch)cm(centimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 2.54).ToString
+                Case "cm(centimeter)in(inch)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 2.54).ToString
+                Case "ft(feet)in(inch)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 12).ToString
+                Case "in(inch)ft(feet)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 12).ToString
+                Case "ft(feet)mm(millimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 304.8).ToString
+                Case "mm(millimeter)ft(feet)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 304.8).ToString
+                Case "in(inch)mm(millimeter)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) * 25.4).ToString
+                Case "mm(millimeter)in(inch)"
+                    tbdr.Text = (CType(tbdr.Text, Decimal) / 25.4).ToString
+            End Select
+        Catch ex As Exception
+        End Try
+    End Sub
+    Private Sub cblc_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cblc.DropDown
+        last = cblc.Text
+    End Sub
+    Private Sub cblc_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cblc.SelectedIndexChanged
+        Try
+            Select Case (last & cblc.Text)
+                Case "m(meter)cm(centimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 100).ToString
+                Case "cm(centimeter)m(meter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 100).ToString
+                Case "m(meter)mm(millimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 1000).ToString
+                Case "mm(millimeter)m(meter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 1000).ToString
+                Case "m(meter)ft(feet)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 3.28083989501312).ToString
+                Case "ft(feet)m(meter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 3.28083989501312).ToString
+                Case "m(meter)in(inch)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 39.3700787401575).ToString
+                Case "in(inch)m(meter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 39.3700787401575).ToString
+                Case "cm(centimeter)mm(millimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 10).ToString
+                Case "mm(millimeter)cm(centimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 10).ToString
+                Case "ft(feet)cm(centimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 30.48).ToString
+                Case "cm(centimeter)ft(feet)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 30.48).ToString
+                Case "in(inch)cm(centimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 2.54).ToString
+                Case "cm(centimeter)in(inch)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 2.54).ToString
+                Case "ft(feet)in(inch)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 12).ToString
+                Case "in(inch)ft(feet)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 12).ToString
+                Case "ft(feet)mm(millimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 304.8).ToString
+                Case "mm(millimeter)ft(feet)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 304.8).ToString
+                Case "in(inch)mm(millimeter)"
+                    tblc.Text = (CType(tblc.Text, Decimal) * 25.4).ToString
+                Case "mm(millimeter)in(inch)"
+                    tblc.Text = (CType(tblc.Text, Decimal) / 25.4).ToString
+            End Select
+        Catch ex As Exception
+        End Try
+    End Sub
+    'Private Sub cbtout_DropDown(ByVal sender As Object, ByVal e As System.EventArgs)
+    '    last = cbtout.Text
+    'End Sub
+    'Private Sub cbtout_SelectedIndexChanged_1(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    Try
+    '        Select Case (last & cbtout.Text)
+    '            Case "hrmin"
+    '                tbtout.Text = (CType(tbtout.Text, Decimal) * 60).ToString
+    '            Case "minhr"
+    '                tbtout.Text = (CType(tbtout.Text, Decimal) / 60).ToString
+    '            Case "hrsec"
+    '                tbtout.Text = (CType(tbtout.Text, Decimal) * 3600).ToString
+    '            Case "sechr"
+    '                tbtout.Text = (CType(tbtout.Text, Decimal) / 3600).ToString
+    '            Case "minsec"
+    '                tbtout.Text = (CType(tbtout.Text, Decimal) * 60).ToString
+    '            Case "secmin"
+    '                tbtout.Text = (CType(tbtout.Text, Decimal) / 60).ToString
+    '        End Select
+    '    Catch ex As Exception
+    '    End Try
+    'End Sub
+    'Private Sub cbtin_DropDown(ByVal sender As Object, ByVal e As System.EventArgs)
+    '    last = cbtin.Text
+    'End Sub
+    'Private Sub cbtin_SelectedIndexChanged_1(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    Try
+    '        Select Case (last & cbtin.Text)
+    '            Case "hrmin"
+    '                tbtin.Text = (CType(tbtin.Text, Decimal) * 60).ToString
+    '            Case "minhr"
+    '                tbtin.Text = (CType(tbtin.Text, Decimal) / 60).ToString
+    '            Case "hrsec"
+    '                tbtin.Text = (CType(tbtin.Text, Decimal) * 3600).ToString
+    '            Case "sechr"
+    '                tbtin.Text = (CType(tbtin.Text, Decimal) / 3600).ToString
+    '            Case "minsec"
+    '                tbtin.Text = (CType(tbtin.Text, Decimal) * 60).ToString
+    '            Case "secmin"
+    '                tbtin.Text = (CType(tbtout.Text, Decimal) / 60).ToString
+    '        End Select
+    '    Catch ex As Exception
+    '    End Try
+    'End Sub
+    ''Private Sub cbvout_DropDown(ByVal sender As Object, ByVal e As System.EventArgs)
+    ''    last = cbvout.Text
+    ''End Sub
+    ''Private Sub cbvout_SelectedIndexChanged_1(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    ''Try
+
+    ''Select Case (last & cbvout.Text)
+    ''    Case "m/secft/sec"
+    ''        tbvout.Text = (CType(tbvout.Text, Decimal) * 3.2808399).ToString
+    ''    Case "ft/secm/sec"
+    ''        tbvout.Text = (CType(tbvout.Text, Decimal) / 3.2808399).ToString
+    ''    Case "m/secin/sec"
+    ''        tbvout.Text = (CType(tbvout.Text, Decimal) * 39.37007874).ToString
+    ''    Case "in/secm/sec"
+    ''        tbvout.Text = (CType(tbvout.Text, Decimal) / 39.37007874).ToString
+    ''    Case "ft/secin/sec"
+    ''        tbvout.Text = (CType(tbvout.Text, Decimal) * 12).ToString
+    ''    Case "in/secft/sec"
+    ''        '        tbvout.Text = (CType(tbvout.Text, Decimal) / 12).ToString
+
+    ''        End Select
+    ''    Catch ex As Exception
+    ''    End Try
+    ''End Sub
+    ''Private Sub cbvin_DropDown(ByVal sender As Object, ByVal e As System.EventArgs)
+    ''    'last = cbvin.Text
+    ''End Sub
+    ''Private Sub cbvin_SelectedIndexChanged_1(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    Try
+
+    ''Select Case (last & cbvin.Text)
+    ''    Case "m/secft/sec"
+    ''        tbvin.Text = (CType(tbvin.Text, Decimal) * 3.2808399).ToString
+    ''    Case "ft/secm/sec"
+    ''        tbvin.Text = (CType(tbvin.Text, Decimal) / 3.2808399).ToString
+    ''    Case "m/secin/sec"
+    ''        tbvin.Text = (CType(tbvin.Text, Decimal) * 39.37007874).ToString
+    ''    Case "in/secm/sec"
+    ''        tbvin.Text = (CType(tbvin.Text, Decimal) / 39.37007874).ToString
+    ''    Case "ft/secin/sec"
+    ''        tbvin.Text = (CType(tbvin.Text, Decimal) * 12).ToString
+    ''    Case "in/secft/sec"
+    ''        tbvin.Text = (CType(tbvin.Text, Decimal) / 12).ToString
+
+    ''End Select
+    '    Catch ex As Exception
+    '    End Try
+    'End Sub
+
+    'Private Sub cbfin_DropDown(ByVal sender As Object, ByVal e As System.EventArgs)
+    '    last = cbfin.Text
+    'End Sub
+    'Private Sub cbfin_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    Try
+    '        Select Case (last & cbfin.Text)
+    '            Case "KNN"
+    '                tbmin.Text = (CType(tbmin.Text, Decimal) * 1000).ToString
+    '            Case "NKN"
+    '                tbmin.Text = (CType(tbmin.Text, Decimal) / 1000).ToString
+    '            Case "IbfKN"
+    '                tbmin.Text = (CType(tbmin.Text, Decimal) * 0.00444822162).ToString
+    '            Case "KNIbf"
+    '                tbmin.Text = (CType(tbmin.Text, Decimal) / 0.00444822162).ToString
+    '            Case "IbfN"
+    '                tbmin.Text = (CType(tbmin.Text, Decimal) * 4.44822162).ToString
+    '            Case "NIbf"
+    '                tbmin.Text = (CType(tbmin.Text, Decimal) / 4.44822162).ToString
+    '        End Select
+    '    Catch ex As Exception
+    '    End Try
+    'End Sub
+
+    Private Sub RadioButton1_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles RadioButton1.CheckedChanged
+        If RadioButton1.Checked = True Then
+            GroupBox1.Enabled = True
+            GroupBox4.Enabled = False
+
+        End If
+    End Sub
+
+    'Private Sub RadioButton2_CheckedChanged_1(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    If RadioButton2.Checked = True Then
+    '        GroupBox2.Enabled = True
+    '        GroupBox3.Enabled = False
+
+    '    End If
+    'End Sub
+
+    'Private Sub RadioButton3_CheckedChanged_1(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    If RadioButton3.Checked = True Then
+    '        GroupBox3.Enabled = True
+    '        GroupBox2.Enabled = False
+
+    '    End If
+    'End Sub
+
+    Private Sub RadioButton4_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles RadioButton2.CheckedChanged
+        If RadioButton2.Checked = True Then
+            GroupBox4.Enabled = True
+            GroupBox1.Enabled = False
+
+        End If
+    End Sub
+
+    Private Sub cbdenr_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cbdenr.DropDown
+        last = cbdenr.Text
+    End Sub
+
+    Private Sub cbdenr_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbdenr.SelectedIndexChanged
+        Try
+            Select Case (last & cbdenr.Text)
+                Case "kg/m3Ibm/in3"
+                    tbdenr.Text = (CType(tbdenr.Text, Decimal) * 0.000036127292).ToString
+                Case "Ibm/in3kg/m3"
+                    tbdenr.Text = (CType(tbdenr.Text, Decimal) / 0.000036127292).ToString
+            End Select
+        Catch ex As Exception
+        End Try
+    End Sub
+
+
+    Private Sub RadioButton100_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles RadioButton100.CheckedChanged
+        If RadioButton100.Checked = True Then
+            'PictureBox1.Enabled = True
+            'PictureBox2.Enabled = False
+
+        End If
+    End Sub
+
+    Private Sub cbmext_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cbmext.DropDown
+        last = cbmext.Text
+    End Sub
+    Private Sub cbmext_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbmext.SelectedIndexChanged
+        Try
+            Select Case (last & cbmext.Text)
+                Case "kgIbm"
+                    tbmext.Text = (CType(tbmext.Text, Decimal) * 2.204622622).ToString
+                Case "Ibmkg"
+                    tbmext.Text = (CType(tbmext.Text, Decimal) / 2.204622622).ToString
+            End Select
+        Catch ex As Exception
+        End Try
+    End Sub
+
+    Private Sub cbmret_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cbmret.DropDown
+        last = cbmret.Text
+    End Sub
+    Private Sub cbmret_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbmret.SelectedIndexChanged
+        Try
+            Select Case (last & cbmret.Text)
+                Case "kgIbm"
+                    tbmret.Text = (CType(tbmret.Text, Decimal) * 2.204622622).ToString
+                Case "Ibmkg"
+                    tbmret.Text = (CType(tbmret.Text, Decimal) / 2.204622622).ToString
+            End Select
+        Catch ex As Exception
+        End Try
+    End Sub
+
+    Private Sub cbT_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cbT.DropDown
+        last = cbT.Text
+    End Sub
+    Private Sub cbT_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbT.SelectedIndexChanged
+        Try
+            Select Case (last & cbT.Text)
+                Case "N.mIbf.ft"
+                    tbT.Text = (CType(tbT.Text, Decimal) * 0.737562149).ToString
+                Case "Ibf.ftN.m"
+                    tbT.Text = (CType(tbT.Text, Decimal) / 0.737562149).ToString
+
+                Case "N.mkW/rpm"
+                    tbT.Text = (CType(tbT.Text, Decimal) * 0.00010472).ToString
+                Case "kW/rpmN.m"
+                    tbT.Text = (CType(tbT.Text, Decimal) / 0.00010472).ToString
+
+                Case "Ibf.ftkW/rpm"
+                    tbT.Text = (CType(tbT.Text, Decimal) * 0.000141981).ToString
+                Case "kW/rpmIbf.ft"
+                    tbT.Text = (CType(tbT.Text, Decimal) / 0.000141981).ToString
+
+            End Select
+        Catch ex As Exception
+        End Try
+    End Sub
+
+    Private Sub cbD_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles cbD.DropDown
+        last = cbD.Text
+    End Sub
+    Private Sub cbD_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbD.SelectedIndexChanged
+
+        Try
+            Select Case (last & cbD.Text)
+                Case "Liter/revcm3/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) * 1000.0).ToString
+                Case "cm3/revLiter/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) / 1000.0).ToString
+
+                Case "Liter/revin3/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) * 61.023744095).ToString
+                Case "in3/revLiter/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) / 61.023744095).ToString
+
+                Case "Liter/revgallon(USA)/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) * 0.264172052).ToString
+                Case "gallon(USA)/revLiter/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) / 0.264172052).ToString
+
+                Case "cm3/revin3/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) * 0.061023744).ToString
+                Case "in3/revcm3/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) / 0.061023744).ToString
+
+                Case "cm3/revgallon(USA)/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) * 0.000264172).ToString
+                Case "gallon(USA)/revcm3/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) / 0.000264172).ToString
+
+                Case "in3/revgallon(USA)/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) * 0.004329004).ToString
+                Case "gallon(USA)/revin3/rev"
+                    tbD.Text = (CType(tbD.Text, Decimal) / 0.004329004).ToString
+
+
+
+            End Select
+        Catch ex As Exception
+            'MsgBox("Please Input Number Only")
+        End Try
+
+
+    End Sub
+
+  
+End Class
