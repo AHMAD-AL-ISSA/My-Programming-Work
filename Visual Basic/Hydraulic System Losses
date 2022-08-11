@@ -1,0 +1,569 @@
+Imports System.Windows.Forms
+
+Public Class dHydraulic_System
+    Dim last As String
+    Dim asdf As hydraulicsys
+
+    Private Sub dHydraulic_System_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+
+
+        RadioButton14.Checked = True
+        RadioButton012.Checked = True
+        RadioButton034.Checked = True
+        RadioButton056.Checked = True
+        GroupBox3.Enabled = True
+
+        ComboBox1.SelectedIndex = 0
+        ComboBox4.SelectedIndex = 0
+        ComboBox3.SelectedIndex = 0
+        ComboBox5.SelectedIndex = 0
+        ComboBox6.SelectedIndex = 0
+        ComboBox7.SelectedIndex = 0
+        ComboBox8.SelectedIndex = 0
+        ComboBox9.SelectedIndex = 0
+
+    End Sub
+
+
+    Private Sub dHydraulic_System_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
+        tbpl.Focus()
+    End Sub
+
+    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+
+
+        ''''''''''''''''''''''''''استدعاء مواصفات الزيت الهيدروليكي''''''''''''''''''''''''''''
+        Dim aa As hydraulicoil
+
+        aa = oilproper.Item(0)
+
+        Dim doil As Decimal
+        Dim visoil As Decimal
+        Dim cpoil As Decimal
+        Dim Koil As Decimal
+        Dim aoil As Decimal
+        Dim Boil As Decimal
+        Dim Tm As Decimal
+
+
+        doil = aa.denoil
+        visoil = aa.viscosityoil
+        cpoil = aa.specificheatoil
+        Koil = aa.thermaloil
+        aoil = aa.cubickoil
+        Boil = aa.Blukoil
+        Tm = aa.Tmax
+
+        Dim pl As Decimal = tbpl.Text
+        Dim voil As Decimal = tbvoil.Text
+        Dim kw As Decimal = tbkw.Text
+        Dim L As Decimal = tbL.Text
+        Dim W As Decimal = tbW.Text
+        Dim th As Decimal = tbth.Text
+
+        Dim PHE As Decimal
+        Dim Ttank As Decimal
+
+        Dim H As Decimal
+
+
+
+
+        Dim ton As Decimal = fHSC.tbton.Text
+        Dim Tam As Decimal = fHSC.tbTam.Text
+        Dim Ti As Decimal = fHSC.tbTi.Text
+
+        Dim Toil As Decimal
+        Dim hh As Decimal
+
+
+        Dim u As Decimal
+
+        Dim heatconv As Decimal
+        Dim heatnet As Decimal
+
+        Dim AAtotal As Decimal
+        Dim A1 As Decimal
+        Dim A2 As Decimal
+        Dim A3 As Decimal
+        Dim A4 As Decimal
+        Dim A5 As Decimal
+        Dim A6 As Decimal
+
+        '''''''''''''''''''''''''''''convert'''''''''''''''''''''''''''''
+        ton = convert_to_sec(ton, fHSC.cbton.Text)
+        Tam = convert_to_C(Tam, fHSC.ComboBox16.Text)
+        Ti = convert_to_C(Ti, fHSC.ComboBox15.Text)
+
+
+        pl = convert_to_w(pl, ComboBox1.Text)
+        kw = convert_to_WpmK(kw, ComboBox4.Text)
+        voil = convert_to_m3(voil, ComboBox3.Text)
+        L = convert_to_meter(L, ComboBox5.Text)
+        W = convert_to_meter(W, ComboBox6.Text)
+        th = convert_to_meter(th, ComboBox7.Text)
+
+
+        '''''''''''''''''''''''''''''calculation'''''''''''''''''''''''''''''
+        H = voil / (L * W)
+
+
+        If RadioButton1.Checked = True Then
+            A1 = 0
+            A2 = H * L
+        ElseIf RadioButton2.Checked = True Then
+            A1 = 0
+            A2 = 0
+        ElseIf RadioButton012.Checked = True Then
+            A1 = H * L
+            A2 = H * L
+        End If
+
+        If RadioButton3.Checked = True Then
+            A3 = 0
+            A4 = H * W
+        ElseIf RadioButton4.Checked = True Then
+            A3 = 0
+            A4 = 0
+        ElseIf RadioButton034.Checked = True Then
+            A3 = H * W
+            A4 = H * W
+        End If
+
+        If RadioButton5.Checked = True Then
+            A5 = 0
+            A6 = L * W
+        ElseIf RadioButton6.Checked = True Then
+            A5 = 0
+            A6 = 0
+        ElseIf RadioButton056.Checked = True Then
+            A5 = L * W
+            A6 = L * W
+        End If
+
+
+
+        AAtotal = A1 + A2 + A3 + A4 + A5 + A6
+
+
+        If fHSC.RadioButton11.Checked = True Then
+            hh = 17.0337
+        ElseIf fHSC.RadioButton12.Checked = True Then
+            hh = 8.517
+        ElseIf fHSC.RadioButton13.Checked = True Then
+            hh = fHSC.tbhh2.Text
+            hh = convert_to_Wpm2K(hh, fHSC.ComboBox51.Text)
+        End If
+
+        u = 1 / ((1 / hh) + (th / kw))
+
+
+        '''''''''''''''''''''''هنا المنظومة لديها مبادل حراري''''''''''''''''''''''''''''''
+        Toil = Ti
+      
+
+        If RadioButton14.Checked = True Then
+
+            Ttank = tbTtank.Text
+            Ttank = convert_to_C(Ttank, ComboBox9.Text)
+
+
+
+            For i = 1 To ton
+
+                asdf.Tempoil = Toil
+
+                hydraulicsystem.Add(asdf)
+
+                heatconv = u * AAtotal * (Tam - Toil)
+
+                heatconv = Math.Round(heatconv, 3)
+
+                If Toil < Ttank Then
+
+                    PHE = 0
+
+                Else
+
+                    PHE = tbPHE.Text
+                    PHE = convert_to_w(PHE, ComboBox8.Text)
+
+                    ''''''''''''''''''''''''فائدة نصفير درجة الحلرارة هي لكي عندما يقارن دائما يعمل المبادل''''''''''''''''''''''''''''''''''''
+                    Ttank = 0
+                End If
+
+                heatnet = pl - PHE
+
+                Toil = Tam + (heatnet / u * AAtotal) * (1 - Math.Exp(-((u * AAtotal * i) / (doil * voil * cpoil))))
+
+                Toil = Math.Round(Toil, 3)
+
+            Next
+
+
+            '''''''''''''''''''''''هنا المنظومة ليس لديها مبادل حراري''''''''''''''''''''''''''''''
+
+
+        ElseIf RadioButton15.Checked = True Then
+
+            PHE = 0
+
+            For i = 1 To ton
+
+                asdf.Tempoil = Toil
+                hydraulicsystem.Add(asdf)
+
+                heatconv = u * AAtotal * (Tam - Toil)
+
+                heatconv = Math.Round(heatconv, 3)
+
+                heatnet = pl + heatconv - PHE
+
+                Toil = Tam + (heatnet / u * AAtotal) * (1 - Math.Exp(-((u * AAtotal * i) / (doil * voil * cpoil))))
+
+                Toil = Math.Round(Toil, 3)
+
+
+            Next
+
+        End If
+
+        Me.DialogResult = System.Windows.Forms.DialogResult.OK
+        Me.Close()
+    End Sub
+
+    Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
+        Me.DialogResult = System.Windows.Forms.DialogResult.Cancel
+        Me.Close()
+    End Sub
+
+
+    Private Sub RadioButton14_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles RadioButton14.CheckedChanged
+        If RadioButton14.Checked = True Then
+            GroupBox3.Enabled = True
+        End If
+    End Sub
+    Private Sub RadioButton15_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles RadioButton15.CheckedChanged
+        If RadioButton15.Checked = True Then
+            GroupBox3.Enabled = False
+        End If
+    End Sub
+
+
+    Private Sub ComboBox1_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox1.DropDown
+        last = ComboBox1.Text
+    End Sub
+    Private Sub ComboBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox1.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox1.Text)
+                Case "WkW"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) / 1000).ToString
+                Case "kWW"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) * 1000).ToString
+                Case "WHP"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) * 0.001341022).ToString
+                Case "HPW"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) / 0.001341022).ToString
+                Case "WIb.ft/sec"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) * 0.737562149).ToString
+                Case "Ib.ft/secW"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) / 0.737562149).ToString
+                Case "kWHP"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) * 1.34102209).ToString
+                Case "HPkW"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) / 1.34102209).ToString
+                Case "kWIb.ft/sec"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) * 737.562149277).ToString
+                Case "Ib.ft/seckW"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) / 737.562149277).ToString
+                Case "HPIb.ft/sec"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) * 550.0).ToString
+                Case "Ib.ft/secHP"
+                    tbpl.Text = (CType(tbpl.Text, Decimal) / 550.0).ToString
+            End Select
+        Catch ex As Exception
+            'MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+    Private Sub ComboBox3_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox4.DropDown
+        last = ComboBox4.Text
+    End Sub
+    Private Sub ComboBox3_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox4.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox4.Text)
+                Case "kW/(m.K)W/(m.K)"
+                    tbkw.Text = (CType(tbkw.Text, Decimal) * 1000).ToString
+                Case "W/(m.K)kW/(m.K)"
+                    tbkw.Text = (CType(tbkw.Text, Decimal) / 1000).ToString
+                Case "kW/(m.K)Btu/(h.ft.F)"
+                    tbkw.Text = (CType(tbkw.Text, Decimal) * 577.82).ToString
+                Case "Btu/(h.ft.F)kW/(m.K)"
+                    tbkw.Text = (CType(tbkw.Text, Decimal) / 577.82).ToString
+                Case "W/(m.K)Btu/(h.ft.F)"
+                    tbkw.Text = (CType(tbkw.Text, Decimal) * 0.57782).ToString
+                Case "Btu/(h.ft.F)W/(m.K)"
+                    tbkw.Text = (CType(tbkw.Text, Decimal) / 0.57782).ToString
+            End Select
+        Catch ex As Exception
+            'MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+    Private Sub ComboBox4_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox3.DropDown
+        last = ComboBox3.Text
+    End Sub
+    Private Sub ComboBox4_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox3.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox3.Text)
+                Case "gpm(USA)gpm(UK)"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) * 0.83267382).ToString
+                Case "gpm(UK)gpm(USA)"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) / 0.83267382).ToString
+                Case "gpm(USA)L/min"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) * 3.78541178).ToString
+                Case "L/mingpm(USA)"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) / 3.78541178).ToString
+                Case "gpm(USA)m3/sec"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) * 0.00006309).ToString
+                Case "m3/secgpm(USA)"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) / 0.00006309).ToString
+                Case "gpm(UK)L/min"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) * 4.546092).ToString
+                Case "L/mingpm(UK)"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) / 4.546092).ToString
+                Case "gpm(UK)m3/sec"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) * 0.00007577).ToString
+                Case "m3/secgpm(UK)"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) / 0.00007577).ToString
+                Case "L/minm3/sec"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) * 0.000016666667).ToString
+                Case "m3/secL/min"
+                    tbvoil.Text = (CType(tbvoil.Text, Decimal) / 0.000016666667).ToString
+            End Select
+        Catch ex As Exception
+            MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+    Private Sub ComboBox5_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox5.DropDown
+        last = ComboBox5.Text
+    End Sub
+    Private Sub ComboBox5_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox5.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox5.Text)
+                Case "m(meter)cm(centimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 100).ToString
+                Case "cm(centimeter)m(meter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 100).ToString
+                Case "m(meter)mm(millimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 1000).ToString
+                Case "mm(millimeter)m(meter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 1000).ToString
+                Case "m(meter)ft(feet)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 3.28083989501312).ToString
+                Case "ft(feet)m(meter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 3.28083989501312).ToString
+                Case "m(meter)in(inch)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 39.3700787401575).ToString
+                Case "in(inch)m(meter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 39.3700787401575).ToString
+                Case "cm(centimeter)mm(millimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 10).ToString
+                Case "mm(millimeter)cm(centimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 10).ToString
+                Case "ft(feet)cm(centimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 30.48).ToString
+                Case "cm(centimeter)ft(feet)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 30.48).ToString
+                Case "in(inch)cm(centimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 2.54).ToString
+                Case "cm(centimeter)in(inch)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 2.54).ToString
+                Case "in(inch)mm(millimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 25.4).ToString
+                Case "mm(millimeter)in(inch)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 25.4).ToString
+                Case "ft(feet)in(inch)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 12).ToString
+                Case "in(inch)ft(feet)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 12).ToString
+                Case "ft(feet)mm(millimeter)"
+                    tbL.Text = (CType(tbL.Text, Decimal) * 304.8).ToString
+                Case "mm(millimeter)ft(feet)"
+                    tbL.Text = (CType(tbL.Text, Decimal) / 304.8).ToString
+            End Select
+        Catch ex As Exception
+            MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+    Private Sub ComboBox6_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox6.DropDown
+        last = ComboBox6.Text
+    End Sub
+    Private Sub ComboBox6_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox6.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox6.Text)
+                Case "m(meter)cm(centimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 100).ToString
+                Case "cm(centimeter)m(meter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 100).ToString
+                Case "m(meter)mm(millimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 1000).ToString
+                Case "mm(millimeter)m(meter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 1000).ToString
+                Case "m(meter)ft(feet)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 3.28083989501312).ToString
+                Case "ft(feet)m(meter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 3.28083989501312).ToString
+                Case "m(meter)in(inch)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 39.3700787401575).ToString
+                Case "in(inch)m(meter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 39.3700787401575).ToString
+                Case "cm(centimeter)mm(millimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 10).ToString
+                Case "mm(millimeter)cm(centimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 10).ToString
+                Case "ft(feet)cm(centimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 30.48).ToString
+                Case "cm(centimeter)ft(feet)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 30.48).ToString
+                Case "in(inch)cm(centimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 2.54).ToString
+                Case "cm(centimeter)in(inch)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 2.54).ToString
+                Case "in(inch)mm(millimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 25.4).ToString
+                Case "mm(millimeter)in(inch)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 25.4).ToString
+                Case "ft(feet)in(inch)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 12).ToString
+                Case "in(inch)ft(feet)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 12).ToString
+                Case "ft(feet)mm(millimeter)"
+                    tbW.Text = (CType(tbW.Text, Decimal) * 304.8).ToString
+                Case "mm(millimeter)ft(feet)"
+                    tbW.Text = (CType(tbW.Text, Decimal) / 304.8).ToString
+            End Select
+        Catch ex As Exception
+            MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+    Private Sub ComboBox7_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox7.DropDown
+        last = ComboBox7.Text
+    End Sub
+    Private Sub ComboBox7_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox7.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox7.Text)
+                Case "m(meter)cm(centimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 100).ToString
+                Case "cm(centimeter)m(meter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 100).ToString
+                Case "m(meter)mm(millimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 1000).ToString
+                Case "mm(millimeter)m(meter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 1000).ToString
+                Case "m(meter)ft(feet)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 3.28083989501312).ToString
+                Case "ft(feet)m(meter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 3.28083989501312).ToString
+                Case "m(meter)in(inch)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 39.3700787401575).ToString
+                Case "in(inch)m(meter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 39.3700787401575).ToString
+                Case "cm(centimeter)mm(millimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 10).ToString
+                Case "mm(millimeter)cm(centimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 10).ToString
+                Case "ft(feet)cm(centimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 30.48).ToString
+                Case "cm(centimeter)ft(feet)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 30.48).ToString
+                Case "in(inch)cm(centimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 2.54).ToString
+                Case "cm(centimeter)in(inch)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 2.54).ToString
+                Case "in(inch)mm(millimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 25.4).ToString
+                Case "mm(millimeter)in(inch)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 25.4).ToString
+                Case "ft(feet)in(inch)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 12).ToString
+                Case "in(inch)ft(feet)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 12).ToString
+                Case "ft(feet)mm(millimeter)"
+                    tbth.Text = (CType(tbth.Text, Decimal) * 304.8).ToString
+                Case "mm(millimeter)ft(feet)"
+                    tbth.Text = (CType(tbth.Text, Decimal) / 304.8).ToString
+            End Select
+        Catch ex As Exception
+            MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+    Private Sub ComboBox8_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox8.DropDown
+        last = ComboBox8.Text
+    End Sub
+    Private Sub ComboBox8_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox8.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox8.Text)
+                Case "WkW"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) / 1000).ToString
+                Case "kWW"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) * 1000).ToString
+                Case "WHP"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) * 0.001341022).ToString
+                Case "HPW"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) / 0.001341022).ToString
+                Case "WIb.ft/sec"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) * 0.737562149).ToString
+                Case "Ib.ft/secW"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) / 0.737562149).ToString
+                Case "kWHP"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) * 1.34102209).ToString
+                Case "HPkW"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) / 1.34102209).ToString
+                Case "kWIb.ft/sec"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) * 737.562149277).ToString
+                Case "Ib.ft/seckW"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) / 737.562149277).ToString
+                Case "HPIb.ft/sec"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) * 550.0).ToString
+                Case "Ib.ft/secHP"
+                    tbPHE.Text = (CType(tbPHE.Text, Decimal) / 550.0).ToString
+            End Select
+        Catch ex As Exception
+            'MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+
+    Private Sub ComboBox9_DropDown(ByVal sender As Object, ByVal e As System.EventArgs) Handles ComboBox9.DropDown
+        last = ComboBox9.Text
+    End Sub
+    Private Sub ComboBox9_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox9.SelectedIndexChanged
+        Try
+            Select Case (last & ComboBox9.Text)
+                Case "KC"
+                    tbTtank.Text = (CType(tbTtank.Text, Decimal) - 273.15).ToString
+                Case "CK"
+                    tbTtank.Text = (CType(tbTtank.Text, Decimal) + 273.15).ToString
+                Case "KF"
+                    tbTtank.Text = (CType(tbTtank.Text, Decimal) * (9 / 5) - 459.67).ToString
+                Case "FK"
+                    tbTtank.Text = ((CType(tbTtank.Text, Decimal) + 459.67) * (5 / 9)).ToString
+                Case "FC"
+                    tbTtank.Text = (((CType(tbTtank.Text, Decimal) + 459.67) * (5 / 9)) - 273.15).ToString
+                Case "CF"
+                    tbTtank.Text = ((CType(tbTtank.Text, Decimal) + 273.15) * (9 / 5) - 459.67).ToString
+            End Select
+        Catch ex As Exception
+            'MsgBox("Please Input Number Only")
+        End Try
+    End Sub
+
+
+
+
+End Class
