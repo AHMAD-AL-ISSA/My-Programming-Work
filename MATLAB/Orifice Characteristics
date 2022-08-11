@@ -1,0 +1,97 @@
+clear
+clc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MATLAB 2021 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%% orifice characteristics %%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% AHMAD AL-ISSA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 05.05.2022 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%-------------------------------- information -----------------------------
+
+D1=78e-3;                % Tube diameter, m 
+D2=15e-3;                % Throat diameter, m
+P1= 1.01325e5;           % Atmospheres pressure, pa (N/m2)
+l1 = 0.025;
+l2 = 0.025;        
+k = 1.4;                 % isentropic coefficient
+R=287.058;               %    J/(kg*K)
+T=200+273;
+v=1;                     % inlet velocity m/sec
+eta = 1.8e-5;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+rho = 1.2;
+rho = P1/(R*T); %Gasdichte
+
+beta = D2/D1;
+L1 = l1/D1;
+L2 = l2/D1;
+M2 = 2*L2/(1-beta);
+Re = rho*v*D1/eta;                                   % Reynolds number
+A = (19000*beta/Re)^0.8;
+
+n=0;
+
+for i=0:1:50
+
+    n=n+1;
+
+    deltaP(n)=i;
+
+    P2 = P1 - deltaP(n);
+
+    if D1 > 71.12
+            
+        C = 0.5961+0.0261*beta^2-0.216*beta^8+0.000521*(10^6*beta/Re)^0.7+...
+                (0.0188+0.0063*A)*beta^3.5*(10^6/Re)^0.3+...
+                (0.043+0.08*exp(-10*L1)-0.123*exp(-7*L1))*(1-0.11*A)*beta^4/(1-beta^4)-...
+                0.031*(M2-0.8*M2^1.1)*beta^1.3;
+        
+    else
+            
+        C = 0.5961+0.0261*beta^2-0.216*beta^8+0.000521*(10^6*beta/Re)^0.7+...
+                (0.0188+0.0063*A)*beta^3.5*(10^6/Re)^0.3+...
+                (0.043+0.08*exp(-10*L1)-0.123*exp(-7*L1))*(1-0.11*A)*beta^4/(1-beta^4)-...
+                0.031*(M2-0.8*M2^1.1)*beta^1.3+0.011*(0.75-beta)*(2.8-D1/25.4);
+
+    end
+
+epsilon = 1-(0.351+0.256*beta^4+0.93*beta^8)*(1-(P2/P1)^(1/k)); % Expansion coefficient
+
+Qper(n)=sqrt(1/(1-(D2/D1)^4))*(pi*D2^2)*sqrt(deltaP(n)/(8*rho));
+
+Qreal(n)=C*epsilon*Qper(n);              % m3/sec
+
+Qreal(n)=Qreal(n)*1000*60;               % L/min
+
+%deltaPreal=8/pi^2)*rho*
+qqq=(1*0.25*pi*D1^2)*3600;               % m3/hr
+
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+plot (Qreal,deltaP,'MarkerSize',10,'LineWidth',2,'Color','k')
+
+grid on
+title('Inlet Velocity = 1 m/s, Tube, Diam.= 78 mm, Orifice, Diam.= 15 mm, Pressure= 1 bar','FontSize',15,'Color','r')
+xlabel ('Flow Rate (L/min)','FontSize',15,'Color','k')
+ylabel ('Pressure Drop ( Pa )','FontSize',15,'Color','k')
+
+T=T-273;
+txt = ['The Calculations with Temperature = ' num2str(T) ' C' ];
+text(8,700,txt)
+
+ax = gca;
+ax.Color = 'w';
+ax.LineWidth = 1;
+ax.GridColor = 'k';
+ax.XAxis.FontSize = 15;
+ax.YAxis.FontSize = 15;
+
+grid on
+grid minor
+xlim([0 max(Qreal)])
+ylim([0 max(deltaP)])
